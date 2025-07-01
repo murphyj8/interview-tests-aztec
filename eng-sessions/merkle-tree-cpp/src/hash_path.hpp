@@ -10,7 +10,10 @@
  * A HashPath is a collection of pairs of 32-byte hashes, each pair
  * representing the left/right child at a given layer in the Merkle path.
  */
+
+
 class HashPath {
+    friend std::ostream& operator<<(std::ostream&, const HashPath&); 
 public:
     // Each entry in 'data' is (left_node, right_node).
     // Each node is 32 bytes. We'll store them in a sha256_hash_t of length 32.
@@ -62,6 +65,34 @@ public:
     }
 };
 
+
+
+std::ostream& operator<<(std::ostream& os, const HashPath& path){
+    if (path.data.empty()) {
+        os << "HashPath: []";
+        return os;
+    }
+
+    for (size_t i = 0; i < path.data.size(); ++i){
+        const auto& pair = path.data[i];
+        os << "  Pair " << i << ":" << std::endl;
+
+        // Print the first hash (left)
+        os << "    Left  Hash: ";
+        for (const auto& byte : pair.first) {
+            os << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte);
+        }
+        os << std::endl;
+
+        // Print the second hash (right)
+        os << "    Right Hash: ";
+        for (const auto& byte : pair.second) {
+            os << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte);
+        }
+        os << std::dec << std::endl; // Reset to decimal for index printing
+    }
+    return os; 
+}
 /**
  * Simple equality operator for testing or comparison.
  */

@@ -42,7 +42,8 @@ public:
     }
 
     // put a value into the store
-    void put(const std::string& key, const std::array<uint8_t, 32>& value) { store[key] = value; }
+    void put(const std::string& key, const std::array<uint8_t, 32>& value) 
+    { store[key] = value; }
 
     // bonus: naive batch write (in a real DB, this might be atomic)
     void batch_write(const std::vector<MockDBBatchItem> &items) {

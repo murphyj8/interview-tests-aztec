@@ -98,22 +98,30 @@ void run_tests()
             throw std::runtime_error("Error in the test's basic SHA256 assumptions!");
         }
 
+        std::cout << "Creating the tree" << std::endl; 
+
         // Create a depth=2 tree and insert 4 leaves.
         auto tree = MerkleTree::create(db, "test", 2);
         for (int i = 0; i < 4; ++i) {
             tree.update_element(i, values[i]);
         }
 
+        std::cout << " tree updated " << std::endl; 
+        auto actual_root = tree.get_root();
+        assert_equal_hex(actual_root, expected_root_hex, "Depth=2 root check");
+        //std::cout << " root hash -> " << to_hex(tree.build_tree()) << std::endl; 
         // Verify hash paths:
         // For indices 0 and 1, the hash path should be [ [e00, e01], [e10, e11] ]
+
         HashPath expected_path_0 = HashPath({ { e00, e01 }, { e10, e11 } });
+        HashPath computed_path_0 = tree.get_hash_path(0);
         if (!(tree.get_hash_path(0) == expected_path_0)) {
             throw std::runtime_error("Hash path for index 0 does not match expected value.");
         }
+
         if (!(tree.get_hash_path(1) == expected_path_0)) {
             throw std::runtime_error("Hash path for index 1 does not match expected value.");
         }
-
         // For indices 2 and 3, the hash path should be [ [e02, e03], [e10, e11] ]
         HashPath expected_path_2 = HashPath({ { e02, e03 }, { e10, e11 } });
         if (!(tree.get_hash_path(2) == expected_path_2)) {
@@ -122,10 +130,8 @@ void run_tests()
         if (!(tree.get_hash_path(3) == expected_path_2)) {
             throw std::runtime_error("Hash path for index 3 does not match expected value.");
         }
-
         // Verify the tree root.
-        auto actual_root = tree.get_root();
-        assert_equal_hex(actual_root, expected_root_hex, "Depth=2 root check");
+        assert_equal_hex(tree.get_root(), expected_root_hex, "Depth=2 root check");
 
         std::cout << "Test 2 success" << std::endl;
     }
@@ -139,11 +145,15 @@ void run_tests()
         for (int i = 0; i < 128; ++i) {
             tree.update_element(i, values[i]);
         }
-        auto tree2 = MerkleTree::create(db, "test", 10);
+        std::cout << "tree root -> " << to_hex(tree.get_root()) << std::endl;
+        auto tree2 = MerkleTree::create(db, "test", 10); 
+        auto calc_tree2_root = tree2.build_tree(); 
+        std::cout << "tree2 root -> " << to_hex(tree2.get_root()) << std::endl;
+
         assert_equal_hex(tree2.get_root(),
                          "4b8404d05a963de56f7212fbf8123204b1eb77a4cb16ae3875679a898aaa5daa",
                          "Restored depth=10 root check");
-
+                        
         for (int i = 0; i < 128; ++i) {
             HashPath hp1 = tree.get_hash_path(i);
             HashPath hp2 =
@@ -223,8 +233,8 @@ void run_tests()
             throw std::runtime_error("HashPath for index 100 does not match expected value.");
         }
         std::cout << "Test 4 success" << std::endl;
-    }
 
+    }
     std::cout << "All tests passed successfully!\n";
 }
 
